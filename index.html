@@ -228,7 +228,7 @@
                             if (losingSides.length > 0) { let winners = ['HEADS', 'TAILS', 'DRAW'].filter(s => !losingSides.includes(s)); finalWinner = winners.length > 0 ? winners[Math.floor(Math.random() * winners.length)] : 'DRAW'; }
                             else { finalWinner = 'DRAW'; }
                         }
-                        await roundRef.update({ status: 'flipping', timer: 3, winner: finalWinner });
+                        await roundRef.update({ status: 'flipping', timer: 10, winner: finalWinner });
                         setTimeout(async () => { await db.ref('live_bets').set(null); }, 5500);
                     }
                 } else if (current.status === 'flipping') {
