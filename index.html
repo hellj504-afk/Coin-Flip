@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ROYAL FLIP • FIXED BET DEDUCTION</title>
+    <title>ROYAL FLIP • FIXED PAYOUT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -107,7 +107,7 @@
     <div id="view-withdraw" class="hidden min-h-screen p-4 flex items-center justify-center"><div class="w-full max-w-md bg-slate-900/90 p-5 rounded-2xl border border-amber-500/30"><div class="flex justify-between mb-4"><h2 class="text-xl font-black text-amber-400">💸 WITHDRAW</h2><button onclick="switchView('game')" class="text-xs bg-slate-800 px-3 py-1.5 rounded">Back</button></div><div id="withdraw-warning" class="bg-rose-950/40 border border-rose-500/30 rounded-xl p-3 mb-4 text-center hidden"><p class="text-[11px] text-rose-400 font-bold">⚠️ FIRST DEPOSIT REQUIRED</p></div><div class="bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 mb-4 text-center"><p class="text-[11px] text-amber-400 font-bold">⏰ PROCESSING: 24 HOURS</p><p class="text-[10px] text-rose-400">⚠️ 10% tax applies</p></div><select id="wit-method" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><option>JazzCash</option><option>EasyPaisa</option></select><input id="wit-title" placeholder="Account Title" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input id="wit-num" placeholder="Account Number" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input type="number" id="wit-amount" placeholder="Amount (Min 300)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><button onclick="submitWithdraw()" class="w-full bg-amber-500 text-black font-bold p-3 rounded-xl">Request</button></div></div>
     <div id="view-user-history" class="hidden min-h-screen p-4 flex items-center justify-center"><div class="w-full max-w-2xl bg-slate-900/90 p-4 rounded-2xl"><div class="flex justify-between mb-3"><h2 class="text-lg font-black text-indigo-400">📜 HISTORY</h2><button onclick="switchView('game')" class="text-xs bg-slate-800 px-3 py-1.5 rounded">Back</button></div><div class="bg-slate-950 rounded-xl p-2 max-h-[400px] overflow-auto"><table class="w-full text-left text-xs"><thead><tr class="text-slate-500"><th>Type</th><th>Amount</th><th>Ref</th><th>Status</th></tr></thead><tbody id="user-history-table-body"></tbody></table></div></div></div>
     <div id="view-admin" class="hidden min-h-screen p-4 bg-slate-900"><div class="max-w-7xl mx-auto"><div class="flex justify-between items-center border-b border-cyan-500/30 pb-4 mb-6"><h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-yellow-400">⚙️ ADMIN</h1><button onclick="logout()" class="bg-rose-600 px-5 py-2 rounded-xl">Logout</button></div><div class="grid lg:grid-cols-2 gap-6"><div class="admin-card rounded-2xl p-4"><h3 class="text-sm font-black text-cyan-400 mb-3">👥 USERS</h3><div class="overflow-x-auto max-h-[500px] overflow-y-auto"><table class="w-full text-left text-sm"><thead><tr class="text-slate-400"><th>#</th><th>ID</th><th>Username</th><th>Balance</th><th>Dep</th><th>Actions</th></tr></thead><tbody id="admin-users-table"></tbody></table></div></div><div class="space-y-5"><div class="admin-card rounded-2xl p-4"><h3 class="text-sm font-black text-emerald-400 mb-3">📥 DEPOSITS</h3><div id="admin-deposit-requests" class="space-y-2 max-h-[250px] overflow-auto"></div></div><div class="admin-card rounded-2xl p-4"><h3 class="text-sm font-black text-amber-400 mb-3">📤 WITHDRAWALS</h3><div id="admin-withdraw-requests" class="space-y-2 max-h-[250px] overflow-auto"></div></div></div></div></div></div>
-    <div id="user-history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"><div class="w-full max-w-2xl bg-slate-900 rounded-2xl border border-cyan-500 shadow-2xl animate-popup"><div class="flex justify-between items-center p-4 border-b border-slate-700"><h3 id="modal-user-name" class="text-lg font-black text-cyan-400">History</h3><button onclick="closeUserHistoryModal()" class="text-slate-400 hover:text-white text-xl">&times;</button></div><div class="p-4 max-h-[400px] overflow-auto"><table class="w-full text-left text-xs"><thead><tr class="text-slate-400"><th>Type</th><th>Amount</th><th>Ref</th><th>Status</th><th>Date</th> </tr></thead><tbody id="modal-history-body"></tbody></table></div></div></div>
+    <div id="user-history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"><div class="w-full max-w-2xl bg-slate-900 rounded-2xl border border-cyan-500 shadow-2xl animate-popup"><div class="flex justify-between items-center p-4 border-b border-slate-700"><h3 id="modal-user-name" class="text-lg font-black text-cyan-400">History</h3><button onclick="closeUserHistoryModal()" class="text-slate-400 hover:text-white text-xl">&times;</button></div><div class="p-4 max-h-[400px] overflow-auto"><table class="w-full text-left text-xs"><thead><tr class="text-slate-400"><th>Type</th><th>Amount</th><th>Ref</th><th>Status</th><th>Date</th> <tr></thead><tbody id="modal-history-body"></tbody></table></div></div></div>
 
     <script>
         const firebaseConfig = {
@@ -132,9 +132,9 @@
         let timerInterval = null;
         let resultTimeout = null;
         let countdownInterval = null;
-        let currentWinner = null;
         let botInterval = null;
-        let isPlacingBet = false; // Prevent double betting
+        let isPlacingBet = false;
+        let processedRounds = new Set(); // Track processed round IDs to avoid double payout
         const botNames = ["👑 CryptoKing", "🐺 AlphaWolf", "💜 NeonGhost", "🌑 DarkMatter", "⚡ StormRider", "🍀 LuckyBoss", "💰 GoldMiner"];
 
         function switchView(view) { 
@@ -154,6 +154,7 @@
             if(countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
             if(botInterval) { clearInterval(botInterval); botInterval = null; }
             activeUser = null; 
+            processedRounds.clear();
             switchView('auth'); 
         }
         
@@ -192,6 +193,7 @@
             if(resultTimeout) { clearTimeout(resultTimeout); resultTimeout = null; }
             if(countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
             if(botInterval) { clearInterval(botInterval); botInterval = null; }
+            processedRounds.clear();
             
             // Reset game state
             isBettingPhase = true;
@@ -230,11 +232,14 @@
                 } 
             }, 4000);
             
-            // Listen for round results from Firebase (for multiplayer sync)
+            // Listen for round results from Firebase
             db.ref('game_results').on('value', (snap) => {
                 let result = snap.val();
                 if(result && result.winner && result.roundId && !spinningNow && !isBettingPhase === false) {
-                    showCoinFlipResult(result.winner);
+                    // Avoid processing same round twice
+                    if(processedRounds.has(result.roundId)) return;
+                    processedRounds.add(result.roundId);
+                    showCoinFlipResult(result.winner, result.roundId);
                     setTimeout(() => { db.ref('game_results').remove(); }, 1000);
                 }
             });
@@ -281,15 +286,15 @@
                         }
                     }
                     
-                    currentWinner = finalWinner;
-                    await db.ref('game_results').set({ winner: finalWinner, roundId: Date.now(), pools: pools });
-                    showCoinFlipResult(finalWinner);
+                    const roundId = Date.now();
+                    await db.ref('game_results').set({ winner: finalWinner, roundId: roundId, pools: pools });
+                    showCoinFlipResult(finalWinner, roundId);
                     await db.ref('live_bets').remove();
                 }
             }, 1000);
         }
         
-        function showCoinFlipResult(winner) {
+        function showCoinFlipResult(winner, roundId) {
             if(spinningNow) return;
             spinningNow = true;
             document.getElementById('betting-ui').classList.add('hidden');
@@ -327,15 +332,20 @@
                     else { clearInterval(countdownInterval); countdownInterval = null; countdownSpan.innerHTML = ''; } 
                 }, 1000);
                 
-                // Payout
+                // Payout: only if user placed a bet on this side
                 let totalWin = 0;
                 if (userBets[winner] > 0) { 
                     let multiplier = winner === 'DRAW' ? 3 : 2; 
                     totalWin = userBets[winner] * multiplier; 
                 }
-                if (totalWin > 0) { 
-                    db.ref(`users/${activeUser}/balance`).set(balance + totalWin); 
-                    document.getElementById('ticker-box').innerHTML = `🎉 You won ${totalWin} coins on ${winner}! 🎉`; 
+                if (totalWin > 0) {
+                    // Use transaction to update balance safely
+                    const userRef = db.ref(`users/${activeUser}/balance`);
+                    userRef.transaction(currentBalance => {
+                        return (currentBalance || 0) + totalWin;
+                    }).then(() => {
+                        document.getElementById('ticker-box').innerHTML = `🎉 You won ${totalWin} coins on ${winner}! 🎉`;
+                    }).catch(err => console.error("Payout error:", err));
                 } else if (userBets.HEADS > 0 || userBets.TAILS > 0 || userBets.DRAW > 0) { 
                     document.getElementById('ticker-box').innerHTML = `💔 You lost ${userBets.HEADS + userBets.TAILS + userBets.DRAW} coins`; 
                 }
@@ -351,6 +361,7 @@
                     coin.classList.remove('coin-spinning');
                     coin.innerHTML = "👑";
                     coin.className = "w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black transition-all duration-200 coin-neutral shadow-2xl";
+                    // Reset bets for next round
                     userBets = { HEADS: 0, TAILS: 0, DRAW: 0 };
                     resetBetButtonsUI();
                     recentResults.unshift(winner);
@@ -369,7 +380,6 @@
         }
         
         async function placeBet(side) {
-            // Prevent double betting
             if (isPlacingBet) return;
             if (!isBettingPhase) return alert("⏳ Wait for next round!");
             if (currentBetAmount > balance) return alert("❌ Insufficient balance!");
@@ -377,10 +387,17 @@
             
             isPlacingBet = true;
             try {
-                // Deduct balance
-                const newBalance = balance - currentBetAmount;
-                await db.ref(`users/${activeUser}/balance`).set(newBalance);
-                balance = newBalance;
+                // Use transaction to deduct balance
+                const userRef = db.ref(`users/${activeUser}/balance`);
+                await userRef.transaction(currentBalance => {
+                    if (currentBalance === null || currentBalance < currentBetAmount) {
+                        return; // abort
+                    }
+                    return currentBalance - currentBetAmount;
+                });
+                // Fetch updated balance
+                const snap = await db.ref(`users/${activeUser}/balance`).once('value');
+                balance = snap.val() || 0;
                 userBets[side] += currentBetAmount;
                 
                 // Visual feedback
@@ -423,7 +440,7 @@
         function submitDeposit() { let amt = parseInt(document.getElementById('dep-amount').value); let tid = document.getElementById('dep-tid').value.trim(); if(!amt || amt < 300) return alert("Minimum 300 PKR"); if(!tid) return alert("Enter TID"); db.ref('deposits').push({user: activeUser, amount: amt, tid: tid, status: 'Pending', timestamp: Date.now()}).then(()=>{ alert("✅ Deposit submitted!\n⏰ 24h processing"); switchView('game'); }); }
         async function submitWithdraw() { if(!hasDeposited) return alert("❌ First deposit required!"); let amt = parseInt(document.getElementById('wit-amount').value); if(amt < 300) return alert("Minimum 300 coins"); if(amt > balance) return alert("Insufficient"); let tax = Math.floor(amt * 0.1); let net = amt - tax; await db.ref(`users/${activeUser}/balance`).set(balance - amt); db.ref('withdraws').push({user: activeUser, amount: amt, net: net, status: 'Pending', timestamp: Date.now()}).then(()=>{ alert(`✅ Withdrawal requested!\n💰 ${amt} coins\n💸 Tax: ${tax}\n💵 You get: ${net}\n⏰ 24h processing`); switchView('game'); }); }
         async function openUserHistory() { switchView('user-history'); let tbody=document.getElementById('user-history-table-body'); tbody.innerHTML=""; let snap=await db.ref('ledger_archive').once('value'); if(snap.exists()) snap.forEach(ch=>{ if(ch.val().user===activeUser) { let tr=document.createElement('tr'); tr.innerHTML=`<td class="py-1">${ch.val().type}</td><td class="text-yellow-400">🪙 ${ch.val().amount}</td><td class="truncate">${ch.val().ref||'-'}</td><td class="${ch.val().status==='Approved'?'text-emerald-400':'text-yellow-500'}">${ch.val().status}</td>`; tbody.appendChild(tr); } }); }
-        function showUserHistory(userId, username) { document.getElementById('modal-user-name').innerHTML = `📜 History: ${username || userId.slice(-8)}`; let tbody = document.getElementById('modal-history-body'); tbody.innerHTML = '<table><td colspan="5" class="text-center py-4">Loading...</td></tr>'; document.getElementById('user-history-modal').classList.remove('hidden'); db.ref('ledger_archive').once('value').then(snap => { tbody.innerHTML = ''; let hasData = false; snap.forEach(ch => { let val = ch.val(); if(val.user === userId) { hasData = true; let tr = document.createElement('tr'); tr.innerHTML = `<td class="py-2">${val.type || '-'}</td><td class="text-yellow-400">🪙 ${val.amount || 0}</td><td class="truncate">${val.ref || '-'}</td><td class="${val.status === 'Approved' ? 'text-emerald-400' : 'text-yellow-500'}">${val.status || 'Pending'}</td><td class="text-[10px] text-slate-400">${val.timestamp ? new Date(val.timestamp).toLocaleString() : '-'}</td>`; tbody.appendChild(tr); } }); if(!hasData) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">No transactions</td></tr>'; }); }
+        function showUserHistory(userId, username) { document.getElementById('modal-user-name').innerHTML = `📜 History: ${username || userId.slice(-8)}`; let tbody = document.getElementById('modal-history-body'); tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Loading...</td></tr>'; document.getElementById('user-history-modal').classList.remove('hidden'); db.ref('ledger_archive').once('value').then(snap => { tbody.innerHTML = ''; let hasData = false; snap.forEach(ch => { let val = ch.val(); if(val.user === userId) { hasData = true; let tr = document.createElement('tr'); tr.innerHTML = `<td class="py-2">${val.type || '-'}</td><td class="text-yellow-400">🪙 ${val.amount || 0}</td><td class="truncate">${val.ref || '-'}</td><td class="${val.status === 'Approved' ? 'text-emerald-400' : 'text-yellow-500'}">${val.status || 'Pending'}</td><td class="text-[10px] text-slate-400">${val.timestamp ? new Date(val.timestamp).toLocaleString() : '-'}</td>`; tbody.appendChild(tr); } }); if(!hasData) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">No transactions</td></tr>'; }); }
         function closeUserHistoryModal() { document.getElementById('user-history-modal').classList.add('hidden'); }
         function editUserBalance(userId, currentBalance, username) { let newBalance = prompt(`Edit balance for ${username || userId.slice(-8)}\nCurrent: ${currentBalance}`, currentBalance); if(newBalance !== null && !isNaN(parseInt(newBalance))) { db.ref(`users/${userId}/balance`).set(parseInt(newBalance)).then(() => alert(`✅ Updated to ${parseInt(newBalance)}`)); } }
         function deleteUserAccount(userId, username) { if(confirm(`⚠️ Delete ${username || userId.slice(-8)}?`)) { db.ref(`users/${userId}`).remove(); alert("✅ Deleted"); } }
