@@ -3,21 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ROYAL FLIP • MULTIPLAYER COIN</title>
+    <title>ROYAL FLIP • FIXED BET DEDUCTION</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        /* Copy all styles from previous code */
-        @keyframes royalFlip3d {
-            0% { transform: rotateY(0deg) rotateX(0deg); filter: drop-shadow(0 0 0px gold); }
-            20% { transform: rotateY(540deg) rotateX(20deg); filter: drop-shadow(0 0 15px rgba(255,215,0,0.8)); }
-            40% { transform: rotateY(1080deg) rotateX(-15deg); filter: drop-shadow(0 0 25px rgba(255,215,0,1)); }
-            60% { transform: rotateY(1620deg) rotateX(15deg); filter: drop-shadow(0 0 25px rgba(255,215,0,1)); }
-            80% { transform: rotateY(2160deg) rotateX(-10deg); filter: drop-shadow(0 0 15px rgba(255,215,0,0.8)); }
-            100% { transform: rotateY(2880deg) rotateX(0deg); filter: drop-shadow(0 0 0px gold); }
+        @keyframes spinCoin3d {
+            0% { transform: rotateY(0deg) rotateX(0deg); }
+            10% { transform: rotateY(360deg) rotateX(15deg); }
+            20% { transform: rotateY(720deg) rotateX(-10deg); }
+            30% { transform: rotateY(1080deg) rotateX(20deg); }
+            40% { transform: rotateY(1440deg) rotateX(-15deg); }
+            50% { transform: rotateY(1800deg) rotateX(10deg); }
+            60% { transform: rotateY(2160deg) rotateX(-20deg); }
+            70% { transform: rotateY(2520deg) rotateX(15deg); }
+            80% { transform: rotateY(2880deg) rotateX(-10deg); }
+            90% { transform: rotateY(3240deg) rotateX(5deg); }
+            100% { transform: rotateY(3600deg) rotateX(0deg); }
         }
-        .coin-spinning { animation: royalFlip3d 2.2s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+        .coin-spinning { animation: spinCoin3d 2.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards; }
         .coin-heads { background: radial-gradient(circle at 35% 35%, #facc15, #eab308, #a16207); box-shadow: 0 0 40px rgba(250,204,21,0.7); border: 3px solid #ffd700; }
         .coin-tails { background: radial-gradient(circle at 35% 35%, #818cf8, #4f46e5, #312e81); box-shadow: 0 0 40px rgba(129,140,248,0.7); border: 3px solid #a5b4fc; }
         .coin-draw { background: radial-gradient(circle at 35% 35%, #f43f5e, #e11d48, #9f1239); box-shadow: 0 0 40px rgba(244,63,94,0.7); border: 3px solid #fda4af; }
@@ -30,17 +34,14 @@
         @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
         .animate-popup { animation: modalFadeIn 0.2s ease-out forwards; }
         .bet-active { transform: scale(0.96); filter: brightness(1.2); background: linear-gradient(135deg, #0284c7, #0369a1) !important; }
-        @keyframes resultPulse { 0% { opacity: 0.7; transform: scale(0.95); } 30% { opacity: 1; transform: scale(1.2); text-shadow: 0 0 20px gold; } 100% { opacity: 0.7; transform: scale(0.95); } }
-        .result-show { animation: resultPulse 0.8s ease-in-out 5; }
+        @keyframes resultGlow { 0% { opacity: 0.8; } 25% { opacity: 1; transform: scale(1.1); text-shadow: 0 0 20px gold; } 100% { opacity: 0.9; } }
+        .result-show { animation: resultGlow 1.5s ease-in-out infinite; }
         .timer-text { text-shadow: 0 0 10px rgba(6,182,212,0.5); }
-        .admin-card { background: rgba(15,23,42,0.8); backdrop-filter: blur(10px); border: 1px solid rgba(6,182,212,0.3); }
-        .user-row { transition: all 0.2s; cursor: pointer; }
-        .user-row:hover { background: rgba(6,182,212,0.1); transform: translateX(5px); }
+        .result-container { background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-radius: 20px; padding: 15px 25px; border: 1px solid rgba(255,215,0,0.3); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white font-sans min-h-screen">
 
-    <!-- AUTH VIEW -->
     <div id="view-auth" class="min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-slate-900/80 backdrop-blur-sm p-6 rounded-2xl border border-cyan-500/30 shadow-2xl">
             <h2 id="auth-title" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-yellow-400 tracking-wider text-center mb-6">👑 ROYAL FLIP</h2>
@@ -48,12 +49,11 @@
                 <input type="text" id="auth-user" placeholder="Username" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-yellow-500">
                 <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-yellow-500">
                 <button onclick="handleAuth()" class="w-full p-3 bg-gradient-to-r from-cyan-500 to-yellow-500 text-black font-bold rounded-xl hover:from-cyan-400 hover:to-yellow-400 transition-all uppercase tracking-wider shadow-lg">Enter Arena</button>
-                <div class="text-center text-xs text-slate-400"><span id="auth-toggle-text">New user?</span> <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-yellow-400 font-bold ml-1 underline">Register</button></div>
+                <div class="text-center text-xs text-slate-400"><span id="auth-toggle-text">New user?</span> <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-yellow-400 font-bold ml-1 underline">Register (50 Bonus)</button></div>
             </div>
         </div>
     </div>
 
-    <!-- MAIN GAME -->
     <div id="view-game" class="hidden flex flex-col items-center justify-between min-h-screen p-3">
         <div class="w-full max-w-md space-y-2">
             <div class="bg-slate-900/80 backdrop-blur-sm py-2 px-3 rounded-xl border border-yellow-500/30 flex justify-between items-center text-xs">
@@ -68,16 +68,24 @@
             </div>
         </div>
         <div class="w-full max-w-md space-y-2 mt-2">
-            <div id="ticker-box" class="text-xs text-yellow-400 bg-slate-900/60 px-3 py-1.5 rounded-full text-center truncate">🔄 Connecting to royal arena...</div>
+            <div id="ticker-box" class="text-xs text-yellow-400 bg-slate-900/60 px-3 py-1.5 rounded-full text-center truncate">🔄 Ready to play...</div>
             <div class="bg-slate-950/80 border border-yellow-500/20 rounded-xl px-3 py-2">
                 <div class="flex items-center gap-2"><span class="text-[9px] text-yellow-500 font-black uppercase shrink-0">⚡ RECENT</span><div id="coinflip-history-row" class="flex gap-1.5 overflow-x-auto no-scrollbar"></div></div>
             </div>
         </div>
         <div class="flex flex-col items-center justify-center my-4 space-y-4 w-full max-w-sm">
             <div><div id="coin-element" class="w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black transition-all duration-200 coin-neutral shadow-2xl">👑</div></div>
-            <div class="text-center">
-                <div id="betting-ui"><p class="text-xs text-yellow-400 uppercase tracking-widest">⏳ BETS CLOSE IN</p><p id="timer-display" class="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-yellow-400 timer-text">15</p></div>
-                <div id="status-display" class="hidden"><p id="result-text" class="text-3xl font-black text-yellow-400 uppercase result-show">WINNER!</p><p id="countdown-timer" class="text-sm text-slate-400 mt-1"></p></div>
+            <div class="text-center w-full">
+                <div id="betting-ui">
+                    <p class="text-xs text-yellow-400 uppercase tracking-widest">⏳ BETS CLOSE IN</p>
+                    <p id="timer-display" class="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-yellow-400 timer-text">15</p>
+                </div>
+                <div id="status-display" class="hidden">
+                    <div class="result-container">
+                        <p id="result-text" class="text-3xl md:text-4xl font-black text-yellow-400 uppercase result-show mb-2">WINNER!</p>
+                        <p id="countdown-timer" class="text-xl font-bold text-cyan-400"></p>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="w-full max-w-md space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-yellow-500/30">
@@ -95,13 +103,11 @@
         </div>
     </div>
 
-    <!-- DEPOSIT / WITHDRAW / HISTORY -->
-    <div id="view-deposit" class="hidden min-h-screen p-4 flex items-center justify-center"><div class="w-full max-w-md bg-slate-900/90 p-5 rounded-2xl border border-emerald-500/30"><div class="flex justify-between mb-4"><h2 class="text-xl font-black text-emerald-400">💰 DEPOSIT</h2><button onclick="switchView('game')" class="text-xs bg-slate-800 px-3 py-1.5 rounded">Back</button></div><div class="animated-till-card bg-slate-950 border-2 border-yellow-500 p-4 rounded-xl text-center mb-4"><p class="text-[10px] text-yellow-400">JAZZCASH</p><p class="text-2xl font-black select-all font-mono">983361104</p><p class="text-[10px]">Min 300 PKR</p></div><input type="number" id="dep-amount" placeholder="Amount" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input type="text" id="dep-tid" placeholder="Transaction ID" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><button onclick="submitDeposit()" class="w-full bg-emerald-500 text-black font-bold p-3 rounded-xl">Submit</button></div></div>
-    <div id="view-withdraw" class="hidden min-h-screen p-4 flex items-center justify-center"><div class="w-full max-w-md bg-slate-900/90 p-5 rounded-2xl border border-amber-500/30"><div class="flex justify-between mb-4"><h2 class="text-xl font-black text-amber-400">💸 WITHDRAW</h2><button onclick="switchView('game')" class="text-xs bg-slate-800 px-3 py-1.5 rounded">Back</button></div><select id="wit-method" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><option>JazzCash</option><option>EasyPaisa</option></select><input id="wit-title" placeholder="Account Title" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input id="wit-num" placeholder="Account Number" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input type="number" id="wit-amount" placeholder="Amount" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><button onclick="submitWithdraw()" class="w-full bg-amber-500 text-black font-bold p-3 rounded-xl">Request</button><p class="text-[10px] text-rose-400 mt-2 text-center">⚠️ 10% fee applies</p></div></div>
+    <div id="view-deposit" class="hidden min-h-screen p-4 flex items-center justify-center"><div class="w-full max-w-md bg-slate-900/90 p-5 rounded-2xl border border-emerald-500/30"><div class="flex justify-between mb-4"><h2 class="text-xl font-black text-emerald-400">💰 JAZZCASH DEPOSIT</h2><button onclick="switchView('game')" class="text-xs bg-slate-800 px-3 py-1.5 rounded">Back</button></div><div class="animated-till-card bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border-2 border-yellow-500 p-5 rounded-xl text-center mb-4"><p class="text-[10px] text-yellow-400 font-bold uppercase">📱 JAZZCASH TILL ID</p><p class="text-3xl font-black select-all font-mono text-yellow-400 my-2">983361104</p></div><div class="bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 mb-4 text-center"><p class="text-[11px] text-amber-400 font-bold">⏰ PROCESSING: 24 HOURS</p></div><input type="number" id="dep-amount" placeholder="Amount (Min 300 PKR)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input type="text" id="dep-tid" placeholder="Transaction ID (TID)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><button onclick="submitDeposit()" class="w-full bg-emerald-500 text-black font-bold p-3 rounded-xl">Submit</button></div></div>
+    <div id="view-withdraw" class="hidden min-h-screen p-4 flex items-center justify-center"><div class="w-full max-w-md bg-slate-900/90 p-5 rounded-2xl border border-amber-500/30"><div class="flex justify-between mb-4"><h2 class="text-xl font-black text-amber-400">💸 WITHDRAW</h2><button onclick="switchView('game')" class="text-xs bg-slate-800 px-3 py-1.5 rounded">Back</button></div><div id="withdraw-warning" class="bg-rose-950/40 border border-rose-500/30 rounded-xl p-3 mb-4 text-center hidden"><p class="text-[11px] text-rose-400 font-bold">⚠️ FIRST DEPOSIT REQUIRED</p></div><div class="bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 mb-4 text-center"><p class="text-[11px] text-amber-400 font-bold">⏰ PROCESSING: 24 HOURS</p><p class="text-[10px] text-rose-400">⚠️ 10% tax applies</p></div><select id="wit-method" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><option>JazzCash</option><option>EasyPaisa</option></select><input id="wit-title" placeholder="Account Title" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input id="wit-num" placeholder="Account Number" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input type="number" id="wit-amount" placeholder="Amount (Min 300)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><button onclick="submitWithdraw()" class="w-full bg-amber-500 text-black font-bold p-3 rounded-xl">Request</button></div></div>
     <div id="view-user-history" class="hidden min-h-screen p-4 flex items-center justify-center"><div class="w-full max-w-2xl bg-slate-900/90 p-4 rounded-2xl"><div class="flex justify-between mb-3"><h2 class="text-lg font-black text-indigo-400">📜 HISTORY</h2><button onclick="switchView('game')" class="text-xs bg-slate-800 px-3 py-1.5 rounded">Back</button></div><div class="bg-slate-950 rounded-xl p-2 max-h-[400px] overflow-auto"><table class="w-full text-left text-xs"><thead><tr class="text-slate-500"><th>Type</th><th>Amount</th><th>Ref</th><th>Status</th></tr></thead><tbody id="user-history-table-body"></tbody></table></div></div></div>
-    <div id="view-admin" class="hidden min-h-screen p-4 bg-slate-900"><div class="max-w-7xl mx-auto"><div class="flex justify-between items-center border-b border-cyan-500/30 pb-4 mb-6"><h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-yellow-400">⚙️ ADMIN PANEL</h1><button onclick="logout()" class="bg-rose-600 px-5 py-2 rounded-xl text-sm font-bold">Logout</button></div><div class="grid lg:grid-cols-3 gap-6"><div class="lg:col-span-2 admin-card rounded-2xl p-4"><div class="flex justify-between mb-4"><h3 class="text-sm font-black text-cyan-400">👥 USERS</h3><span id="user-count" class="text-xs bg-cyan-500/20 px-2 py-1 rounded-full">0</span></div><div class="overflow-x-auto max-h-[500px] overflow-y-auto"><table class="w-full text-left text-sm"><thead class="sticky top-0 bg-slate-800/90"><tr class="text-slate-400"><th>#</th><th>Player ID</th><th>Username</th><th>Balance</th><th class="text-center">Actions</th></tr></thead><tbody id="admin-users-table"></tbody></table></div></div><div class="space-y-5"><div class="admin-card rounded-2xl p-4"><h3 class="text-sm font-black text-emerald-400 mb-3">📥 DEPOSITS</h3><div id="admin-deposit-requests" class="space-y-2 max-h-[200px] overflow-auto"></div></div><div class="admin-card rounded-2xl p-4"><h3 class="text-sm font-black text-amber-400 mb-3">📤 WITHDRAWALS</h3><div id="admin-withdraw-requests" class="space-y-2 max-h-[200px] overflow-auto"></div></div></div></div></div></div>
-
-    <div id="user-history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"><div class="w-full max-w-2xl bg-slate-900 rounded-2xl border border-cyan-500 shadow-2xl animate-popup"><div class="flex justify-between items-center p-4 border-b border-slate-700"><h3 id="modal-user-name" class="text-lg font-black text-cyan-400">History</h3><button onclick="closeUserHistoryModal()" class="text-slate-400 hover:text-white text-xl">&times;</button></div><div class="p-4 max-h-[400px] overflow-auto"><table class="w-full text-left text-xs"><thead class="sticky top-0 bg-slate-800"><tr class="text-slate-400"><th>Type</th><th>Amount</th><th>Reference</th><th>Status</th><th>Date</th></tr></thead><tbody id="modal-history-body"></tbody></table></div></div></div>
+    <div id="view-admin" class="hidden min-h-screen p-4 bg-slate-900"><div class="max-w-7xl mx-auto"><div class="flex justify-between items-center border-b border-cyan-500/30 pb-4 mb-6"><h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-yellow-400">⚙️ ADMIN</h1><button onclick="logout()" class="bg-rose-600 px-5 py-2 rounded-xl">Logout</button></div><div class="grid lg:grid-cols-2 gap-6"><div class="admin-card rounded-2xl p-4"><h3 class="text-sm font-black text-cyan-400 mb-3">👥 USERS</h3><div class="overflow-x-auto max-h-[500px] overflow-y-auto"><table class="w-full text-left text-sm"><thead><tr class="text-slate-400"><th>#</th><th>ID</th><th>Username</th><th>Balance</th><th>Dep</th><th>Actions</th></tr></thead><tbody id="admin-users-table"></tbody></table></div></div><div class="space-y-5"><div class="admin-card rounded-2xl p-4"><h3 class="text-sm font-black text-emerald-400 mb-3">📥 DEPOSITS</h3><div id="admin-deposit-requests" class="space-y-2 max-h-[250px] overflow-auto"></div></div><div class="admin-card rounded-2xl p-4"><h3 class="text-sm font-black text-amber-400 mb-3">📤 WITHDRAWALS</h3><div id="admin-withdraw-requests" class="space-y-2 max-h-[250px] overflow-auto"></div></div></div></div></div></div>
+    <div id="user-history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"><div class="w-full max-w-2xl bg-slate-900 rounded-2xl border border-cyan-500 shadow-2xl animate-popup"><div class="flex justify-between items-center p-4 border-b border-slate-700"><h3 id="modal-user-name" class="text-lg font-black text-cyan-400">History</h3><button onclick="closeUserHistoryModal()" class="text-slate-400 hover:text-white text-xl">&times;</button></div><div class="p-4 max-h-[400px] overflow-auto"><table class="w-full text-left text-xs"><thead><tr class="text-slate-400"><th>Type</th><th>Amount</th><th>Ref</th><th>Status</th><th>Date</th> </tr></thead><tbody id="modal-history-body"></tbody></table></div></div></div>
 
     <script>
         const firebaseConfig = {
@@ -116,17 +122,40 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let activeUser = null, registerMode = false, balance = 0;
+        let activeUser = null, registerMode = false, balance = 0, hasDeposited = false;
         let currentBetAmount = 10;
         let userBets = { HEADS: 0, TAILS: 0, DRAW: 0 };
-        let spinningNow = false, isMaster = false;
+        let spinningNow = false;
         let recentResults = ["HEADS", "TAILS", "HEADS", "DRAW", "TAILS", "HEADS"];
-        let masterInterval = null, resultTimeout = null;
-        const botNames = ["👑 CryptoKing", "🐺 AlphaWolf", "💜 NeonGhost", "🌑 DarkMatter", "⚡ StormRider", "🍀 LuckyBoss"];
+        let localTimer = 15;
+        let isBettingPhase = true;
+        let timerInterval = null;
+        let resultTimeout = null;
+        let countdownInterval = null;
+        let currentWinner = null;
+        let botInterval = null;
+        let isPlacingBet = false; // Prevent double betting
+        const botNames = ["👑 CryptoKing", "🐺 AlphaWolf", "💜 NeonGhost", "🌑 DarkMatter", "⚡ StormRider", "🍀 LuckyBoss", "💰 GoldMiner"];
 
-        function switchView(view) { ['auth','game','deposit','withdraw','admin','user-history'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden')); if(view !== 'auth') document.getElementById(`view-${view}`).classList.remove('hidden'); else document.getElementById('view-auth').classList.remove('hidden'); }
-        function toggleAuthMode() { registerMode = !registerMode; document.getElementById('auth-title').innerText = registerMode ? "📝 REGISTER" : "👑 LOGIN"; document.getElementById('auth-toggle-text').innerText = registerMode ? "Have account?" : "New user?"; document.getElementById('auth-toggle-btn').innerText = registerMode ? "Login" : "Register"; }
-        function logout() { if(masterInterval) clearInterval(masterInterval); if(resultTimeout) clearTimeout(resultTimeout); activeUser = null; switchView('auth'); }
+        function switchView(view) { 
+            ['auth','game','deposit','withdraw','admin','user-history'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden')); 
+            if(view !== 'auth') document.getElementById(`view-${view}`).classList.remove('hidden'); 
+            else document.getElementById('view-auth').classList.remove('hidden');
+            if(view === 'withdraw' && activeUser && activeUser !== 'ADMIN') {
+                if(!hasDeposited) document.getElementById('withdraw-warning').classList.remove('hidden');
+                else document.getElementById('withdraw-warning').classList.add('hidden');
+            }
+        }
+        function toggleAuthMode() { registerMode = !registerMode; document.getElementById('auth-title').innerText = registerMode ? "📝 REGISTER (50 BONUS)" : "👑 LOGIN"; document.getElementById('auth-toggle-text').innerText = registerMode ? "Have account?" : "New user?"; document.getElementById('auth-toggle-btn').innerText = registerMode ? "Login" : "Register"; }
+        
+        function logout() { 
+            if(timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+            if(resultTimeout) { clearTimeout(resultTimeout); resultTimeout = null; }
+            if(countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+            if(botInterval) { clearInterval(botInterval); botInterval = null; }
+            activeUser = null; 
+            switchView('auth'); 
+        }
         
         async function handleAuth() {
             let user = document.getElementById('auth-user').value.trim();
@@ -137,138 +166,274 @@
                 let snap = await db.ref('users').orderByChild('username').equalTo(user).once('value');
                 if (snap.exists()) return alert("Username taken");
                 let newRef = db.ref('users').push();
-                await newRef.set({ uid: newRef.key, username: user, password: pass, balance: 100, hasDeposited: false, createdAt: Date.now() });
-                alert(`✅ Registered! ID: ${newRef.key.slice(-8)}`);
+                await newRef.set({ uid: newRef.key, username: user, password: pass, balance: 50, hasDeposited: false });
+                alert(`✅ Registered! 50 BONUS!\nID: ${newRef.key.slice(-8)}`);
                 toggleAuthMode();
             } else {
                 let snap = await db.ref('users').orderByChild('username').equalTo(user).once('value');
-                if (!snap.exists()) return alert("Invalid credentials");
+                if (!snap.exists()) return alert("Invalid");
                 let found = null;
                 snap.forEach(ch => { if (ch.val().password === pass) found = ch.val(); });
-                if (found) { activeUser = found.uid; document.getElementById('player-id').innerText = activeUser.slice(-8); switchView('game'); initGame(); }
-                else alert("Wrong password");
+                if (found) { 
+                    activeUser = found.uid; 
+                    hasDeposited = found.hasDeposited || false;
+                    document.getElementById('player-id').innerText = activeUser.slice(-8); 
+                    switchView('game'); 
+                    initGame(); 
+                } else alert("Wrong password");
             }
         }
         
         async function initGame() {
             updateHistoryUI();
-            let roundSnap = await db.ref('game_round').once('value');
-            if (!roundSnap.exists()) await db.ref('game_round').set({ status: 'betting', timer: 15, winner: 'HEADS' });
-            db.ref('game_master').on('value', s => { if(!s.exists() || s.val() === activeUser) { db.ref('game_master').set(activeUser); isMaster = true; startMasterLoop(); } else isMaster = (s.val() === activeUser); });
-            db.ref(`users/${activeUser}`).on('value', snap => { if(snap.val()) { balance = snap.val().balance || 0; document.getElementById('balance-display').innerHTML = `🪙 ${balance}`; } });
-            db.ref('game_round').on('value', (snap) => {
-                let round = snap.val();
-                if (!round) return;
-                if (round.status === 'betting') {
-                    spinningNow = false;
-                    if(resultTimeout) clearTimeout(resultTimeout);
-                    document.getElementById('betting-ui').classList.remove('hidden');
-                    document.getElementById('status-display').classList.add('hidden');
-                    document.getElementById('timer-display').innerText = round.timer;
-                    let coin = document.getElementById('coin-element');
-                    coin.classList.remove('coin-spinning');
-                    coin.innerHTML = "👑";
-                    coin.className = "w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black transition-all duration-200 coin-neutral shadow-2xl";
-                } else if (round.status === 'flipping' && !spinningNow) {
-                    spinningNow = true;
-                    document.getElementById('betting-ui').classList.add('hidden');
-                    document.getElementById('status-display').classList.remove('hidden');
-                    let resultText = document.getElementById('result-text');
-                    let countdownSpan = document.getElementById('countdown-timer');
-                    let coin = document.getElementById('coin-element');
-                    coin.classList.add('coin-spinning');
-                    coin.innerHTML = "✨";
-                    let winner = round.winner;
-                    setTimeout(() => {
-                        coin.classList.remove('coin-spinning');
-                        if (winner === 'HEADS') { coin.innerHTML = "🪙 H"; coin.className = "w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black coin-heads shadow-2xl"; resultText.innerHTML = "🪙 HEADS WINS! 🪙"; }
-                        else if (winner === 'TAILS') { coin.innerHTML = "🪙 T"; coin.className = "w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black coin-tails shadow-2xl"; resultText.innerHTML = "🪙 TAILS WINS! 🪙"; }
-                        else { coin.innerHTML = "⚖️"; coin.className = "w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black coin-draw shadow-2xl"; resultText.innerHTML = "⚖️ DRAW! ⚖️"; }
-                        resultText.classList.add('result-show');
-                        let remaining = 5;
-                        countdownSpan.innerHTML = `Next round in ${remaining}s`;
-                        let countdownInterval = setInterval(() => { remaining--; if(remaining > 0) countdownSpan.innerHTML = `Next round in ${remaining}s`; else { clearInterval(countdownInterval); countdownSpan.innerHTML = ''; } }, 1000);
-                        resultTimeout = setTimeout(() => { resultText.classList.remove('result-show'); }, 4800);
-                        recentResults.unshift(winner);
-                        if(recentResults.length > 15) recentResults.pop();
-                        updateHistoryUI();
-                        let totalWin = 0;
-                        if (userBets[winner] > 0) { let multiplier = winner === 'DRAW' ? 3 : 2; totalWin = userBets[winner] * multiplier; }
-                        if (totalWin > 0) { db.ref(`users/${activeUser}/balance`).set(balance + totalWin); document.getElementById('ticker-box').innerHTML = `🎉 You won ${totalWin} coins on ${winner}! 🎉`; }
-                        else if (userBets.HEADS > 0 || userBets.TAILS > 0 || userBets.DRAW > 0) { document.getElementById('ticker-box').innerHTML = `💔 You lost ${userBets.HEADS + userBets.TAILS + userBets.DRAW} coins...`; }
-                        userBets = { HEADS: 0, TAILS: 0, DRAW: 0 };
-                        resetBetButtonsUI();
-                    }, 2200);
+            
+            // Clear any existing intervals
+            if(timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+            if(resultTimeout) { clearTimeout(resultTimeout); resultTimeout = null; }
+            if(countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+            if(botInterval) { clearInterval(botInterval); botInterval = null; }
+            
+            // Reset game state
+            isBettingPhase = true;
+            spinningNow = false;
+            isPlacingBet = false;
+            localTimer = 15;
+            document.getElementById('betting-ui').classList.remove('hidden');
+            document.getElementById('status-display').classList.add('hidden');
+            document.getElementById('timer-display').innerText = "15";
+            
+            // Reset coin
+            let coin = document.getElementById('coin-element');
+            coin.classList.remove('coin-spinning');
+            coin.innerHTML = "👑";
+            coin.className = "w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black transition-all duration-200 coin-neutral shadow-2xl";
+            
+            // User balance sync
+            db.ref(`users/${activeUser}`).on('value', snap => { 
+                if(snap.val()) { 
+                    balance = snap.val().balance || 0; 
+                    hasDeposited = snap.val().hasDeposited || false; 
+                    document.getElementById('balance-display').innerHTML = `🪙 ${balance}`; 
+                } 
+            });
+            
+            // Start local timer
+            startLocalTimer();
+            
+            // Bot activity
+            botInterval = setInterval(() => { 
+                if (isBettingPhase && document.getElementById('betting-ui') && !document.getElementById('betting-ui').classList.contains('hidden')) { 
+                    let randomBot = botNames[Math.floor(Math.random() * botNames.length)]; 
+                    let randomBet = [50, 100, 200, 500][Math.floor(Math.random() * 4)]; 
+                    let randomSide = ['HEADS', 'TAILS', 'DRAW'][Math.floor(Math.random() * 3)]; 
+                    document.getElementById('ticker-box').innerHTML = `🔥 ${randomBot} bet ${randomBet} on ${randomSide}!`; 
+                } 
+            }, 4000);
+            
+            // Listen for round results from Firebase (for multiplayer sync)
+            db.ref('game_results').on('value', (snap) => {
+                let result = snap.val();
+                if(result && result.winner && result.roundId && !spinningNow && !isBettingPhase === false) {
+                    showCoinFlipResult(result.winner);
+                    setTimeout(() => { db.ref('game_results').remove(); }, 1000);
                 }
             });
-            setInterval(() => { if (document.getElementById('betting-ui') && !document.getElementById('betting-ui').classList.contains('hidden')) { let randomBot = botNames[Math.floor(Math.random() * botNames.length)]; let randomBet = [50, 100, 200, 500][Math.floor(Math.random() * 4)]; let randomSide = ['HEADS', 'TAILS', 'DRAW'][Math.floor(Math.random() * 3)]; document.getElementById('ticker-box').innerHTML = `🔥 ${randomBot} bet ${randomBet} on ${randomSide}!`; } }, 2800);
         }
         
-        function startMasterLoop() {
-            if(masterInterval) clearInterval(masterInterval);
-            masterInterval = setInterval(async () => {
-                if (!isMaster) return;
-                const roundRef = db.ref('game_round');
-                const current = (await roundRef.once('value')).val();
-                if (!current) { await roundRef.set({ status: 'betting', timer: 15, winner: 'HEADS' }); return; }
-                if (current.status === 'betting') {
-                    if (current.timer > 1) { await roundRef.update({ timer: current.timer - 1 }); }
-                    else {
-                        const betsSnap = await db.ref('live_bets').once('value');
-                        let pools = { HEADS: 0, TAILS: 0, DRAW: 0 };
-                        betsSnap.forEach(b => { let v = b.val(); if(v.choice === 'HEADS') pools.HEADS += v.amount; if(v.choice === 'TAILS') pools.TAILS += v.amount; if(v.choice === 'DRAW') pools.DRAW += v.amount; });
-                        let finalWinner;
-                        if (Math.random() < 0.10) { finalWinner = ['HEADS', 'TAILS', 'DRAW'][Math.floor(Math.random() * 3)]; }
-                        else {
-                            let maxPool = Math.max(pools.HEADS, pools.TAILS, pools.DRAW);
-                            let losingSides = [];
-                            if (pools.HEADS === maxPool && maxPool > 0) losingSides.push('HEADS');
-                            if (pools.TAILS === maxPool && maxPool > 0) losingSides.push('TAILS');
-                            if (pools.DRAW === maxPool && maxPool > 0) losingSides.push('DRAW');
-                            if (losingSides.length > 0) { let winners = ['HEADS', 'TAILS', 'DRAW'].filter(s => !losingSides.includes(s)); finalWinner = winners.length > 0 ? winners[Math.floor(Math.random() * winners.length)] : 'DRAW'; }
-                            else { finalWinner = 'DRAW'; }
+        function startLocalTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(async () => {
+                if (!isBettingPhase || spinningNow) return;
+                
+                if (localTimer > 1) {
+                    localTimer--;
+                    document.getElementById('timer-display').innerText = localTimer;
+                } else {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    isBettingPhase = false;
+                    
+                    const betsSnap = await db.ref('live_bets').once('value');
+                    let pools = { HEADS: 0, TAILS: 0, DRAW: 0 };
+                    betsSnap.forEach(b => { 
+                        let v = b.val(); 
+                        if(v && v.choice === 'HEADS') pools.HEADS += (v.amount || 0); 
+                        if(v && v.choice === 'TAILS') pools.TAILS += (v.amount || 0); 
+                        if(v && v.choice === 'DRAW') pools.DRAW += (v.amount || 0); 
+                    });
+                    
+                    let finalWinner;
+                    let random = Math.random();
+                    if (random < 0.10) { 
+                        finalWinner = ['HEADS', 'TAILS', 'DRAW'][Math.floor(Math.random() * 3)]; 
+                    } else {
+                        let maxPool = Math.max(pools.HEADS, pools.TAILS, pools.DRAW);
+                        let losingSides = [];
+                        if (pools.HEADS === maxPool && maxPool > 0) losingSides.push('HEADS');
+                        if (pools.TAILS === maxPool && maxPool > 0) losingSides.push('TAILS');
+                        if (pools.DRAW === maxPool && maxPool > 0) losingSides.push('DRAW');
+                        if (losingSides.length > 0) { 
+                            let winners = ['HEADS', 'TAILS', 'DRAW'].filter(s => !losingSides.includes(s)); 
+                            finalWinner = winners.length > 0 ? winners[Math.floor(Math.random() * winners.length)] : 'DRAW'; 
+                        } else { 
+                            finalWinner = 'DRAW'; 
                         }
-                        await roundRef.update({ status: 'flipping', timer: 10, winner: finalWinner });
-                        setTimeout(async () => { await db.ref('live_bets').set(null); }, 5500);
                     }
-                } else if (current.status === 'flipping') {
-                    if (current.timer > 1) await roundRef.update({ timer: current.timer - 1 });
-                    else await roundRef.update({ status: 'betting', timer: 15, winner: 'HEADS' });
+                    
+                    currentWinner = finalWinner;
+                    await db.ref('game_results').set({ winner: finalWinner, roundId: Date.now(), pools: pools });
+                    showCoinFlipResult(finalWinner);
+                    await db.ref('live_bets').remove();
                 }
             }, 1000);
         }
         
-        function changeBet(delta) { currentBetAmount = Math.max(10, Math.min(5000, currentBetAmount + delta)); document.getElementById('bet-display').innerHTML = currentBetAmount + " Coins"; }
-        async function placeBet(side) {
-            let roundSnap = await db.ref('game_round').once('value');
-            if (!roundSnap.exists() || roundSnap.val().status !== 'betting') return alert("⏳ Wait for next round!");
-            if (currentBetAmount > balance) return alert("❌ Insufficient balance!");
-            await db.ref(`users/${activeUser}/balance`).set(balance - currentBetAmount);
-            balance -= currentBetAmount;
-            userBets[side] += currentBetAmount;
-            const btn = document.getElementById(`btn-${side}`);
-            btn.classList.add('bet-active');
-            setTimeout(() => btn.classList.remove('bet-active'), 300);
-            await db.ref('live_bets').push({ player: activeUser, choice: side, amount: currentBetAmount });
-            document.getElementById('ticker-box').innerHTML = `✅ You bet ${currentBetAmount} on ${side}!`;
-            if(side === 'HEADS') document.getElementById('btn-HEADS').innerHTML = `<div class="text-2xl mb-1">🪙</div><div>HEADS</div><div class="text-[9px] text-yellow-300 mt-1">bet: ${userBets.HEADS}</div>`;
-            if(side === 'TAILS') document.getElementById('btn-TAILS').innerHTML = `<div class="text-2xl mb-1">🪙</div><div>TAILS</div><div class="text-[9px] text-yellow-300 mt-1">bet: ${userBets.TAILS}</div>`;
-            if(side === 'DRAW') document.getElementById('btn-DRAW').innerHTML = `<div class="text-2xl mb-1">⚖️</div><div>DRAW</div><div class="text-[9px] text-yellow-300 mt-1">bet: ${userBets.DRAW}</div>`;
+        function showCoinFlipResult(winner) {
+            if(spinningNow) return;
+            spinningNow = true;
+            document.getElementById('betting-ui').classList.add('hidden');
+            document.getElementById('status-display').classList.remove('hidden');
+            let resultText = document.getElementById('result-text');
+            let countdownSpan = document.getElementById('countdown-timer');
+            let coin = document.getElementById('coin-element');
+            
+            coin.classList.add('coin-spinning');
+            coin.innerHTML = "✨";
+            
+            setTimeout(() => {
+                coin.classList.remove('coin-spinning');
+                if (winner === 'HEADS') { 
+                    coin.innerHTML = "🪙 H"; 
+                    coin.className = "w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black coin-heads shadow-2xl"; 
+                    resultText.innerHTML = "🪙 HEADS WINS! 🪙"; 
+                } else if (winner === 'TAILS') { 
+                    coin.innerHTML = "🪙 T"; 
+                    coin.className = "w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black coin-tails shadow-2xl"; 
+                    resultText.innerHTML = "🪙 TAILS WINS! 🪙"; 
+                } else { 
+                    coin.innerHTML = "⚖️"; 
+                    coin.className = "w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black coin-draw shadow-2xl"; 
+                    resultText.innerHTML = "⚖️ DRAW! ⚖️"; 
+                }
+                
+                resultText.classList.add('result-show');
+                let remaining = 10;
+                countdownSpan.innerHTML = `Next round in ${remaining}s`;
+                if(countdownInterval) clearInterval(countdownInterval);
+                countdownInterval = setInterval(() => { 
+                    remaining--; 
+                    if(remaining > 0) countdownSpan.innerHTML = `Next round in ${remaining}s`;
+                    else { clearInterval(countdownInterval); countdownInterval = null; countdownSpan.innerHTML = ''; } 
+                }, 1000);
+                
+                // Payout
+                let totalWin = 0;
+                if (userBets[winner] > 0) { 
+                    let multiplier = winner === 'DRAW' ? 3 : 2; 
+                    totalWin = userBets[winner] * multiplier; 
+                }
+                if (totalWin > 0) { 
+                    db.ref(`users/${activeUser}/balance`).set(balance + totalWin); 
+                    document.getElementById('ticker-box').innerHTML = `🎉 You won ${totalWin} coins on ${winner}! 🎉`; 
+                } else if (userBets.HEADS > 0 || userBets.TAILS > 0 || userBets.DRAW > 0) { 
+                    document.getElementById('ticker-box').innerHTML = `💔 You lost ${userBets.HEADS + userBets.TAILS + userBets.DRAW} coins`; 
+                }
+                
+                resultTimeout = setTimeout(() => {
+                    resultText.classList.remove('result-show');
+                    spinningNow = false;
+                    isBettingPhase = true;
+                    localTimer = 15;
+                    document.getElementById('timer-display').innerText = "15";
+                    document.getElementById('betting-ui').classList.remove('hidden');
+                    document.getElementById('status-display').classList.add('hidden');
+                    coin.classList.remove('coin-spinning');
+                    coin.innerHTML = "👑";
+                    coin.className = "w-44 h-44 rounded-full flex items-center justify-center text-6xl font-black transition-all duration-200 coin-neutral shadow-2xl";
+                    userBets = { HEADS: 0, TAILS: 0, DRAW: 0 };
+                    resetBetButtonsUI();
+                    recentResults.unshift(winner);
+                    if(recentResults.length > 15) recentResults.pop();
+                    updateHistoryUI();
+                    startLocalTimer();
+                    resultTimeout = null;
+                }, 10000);
+            }, 2500);
         }
-        function resetBetButtonsUI() { document.getElementById('btn-HEADS').innerHTML = `<div class="text-2xl mb-1">🪙</div><div>HEADS</div><div class="text-[10px] text-cyan-400 mt-1">2x</div>`; document.getElementById('btn-TAILS').innerHTML = `<div class="text-2xl mb-1">🪙</div><div>TAILS</div><div class="text-[10px] text-indigo-400 mt-1">2x</div>`; document.getElementById('btn-DRAW').innerHTML = `<div class="text-2xl mb-1">⚖️</div><div>DRAW</div><div class="text-[10px] text-rose-400 mt-1">3x</div>`; }
-        function updateHistoryUI() { let container = document.getElementById('coinflip-history-row'); if(!container) return; container.innerHTML = ""; recentResults.slice(0, 12).forEach(res => { let badge = document.createElement('span'); badge.innerText = res === 'DRAW' ? '3x' : '2x'; if(res === 'DRAW') badge.className = "px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white"; else if(res === 'HEADS') badge.className = "px-2 py-0.5 rounded-full text-[10px] font-black bg-cyan-600 text-white"; else badge.className = "px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-600 text-white"; container.appendChild(badge); }); }
-        function submitDeposit() { let amt=parseInt(document.getElementById('dep-amount').value), tid=document.getElementById('dep-tid').value.trim(); if(!amt||!tid) return alert("Enter details"); db.ref('deposits').push({user:activeUser, amount:amt, tid:tid, status:'Pending', timestamp:Date.now()}).then(()=>{ alert("Deposit sent!"); switchView('game'); }); }
-        async function submitWithdraw() { let method=document.getElementById('wit-method').value, title=document.getElementById('wit-title').value.trim(), num=document.getElementById('wit-num').value.trim(), amt=parseInt(document.getElementById('wit-amount').value); if(!title||!num||!amt) return alert("Fill all"); if(amt>balance) return alert("Insufficient"); let tax=Math.floor(amt*0.1), net=amt-tax; await db.ref(`users/${activeUser}/balance`).set(balance-amt); db.ref('withdraws').push({user:activeUser, method, title, account:num, requestedAmount:amt, amount:net, status:'Pending', timestamp:Date.now()}).then(()=>{ alert("Withdraw requested"); switchView('game'); }); }
+        
+        function changeBet(delta) { 
+            if(!isBettingPhase) return alert("⏳ Wait for next round!");
+            currentBetAmount = Math.max(10, Math.min(5000, currentBetAmount + delta)); 
+            document.getElementById('bet-display').innerHTML = currentBetAmount + " Coins"; 
+        }
+        
+        async function placeBet(side) {
+            // Prevent double betting
+            if (isPlacingBet) return;
+            if (!isBettingPhase) return alert("⏳ Wait for next round!");
+            if (currentBetAmount > balance) return alert("❌ Insufficient balance!");
+            if (currentBetAmount < 10) return alert("Minimum bet 10 coins");
+            
+            isPlacingBet = true;
+            try {
+                // Deduct balance
+                const newBalance = balance - currentBetAmount;
+                await db.ref(`users/${activeUser}/balance`).set(newBalance);
+                balance = newBalance;
+                userBets[side] += currentBetAmount;
+                
+                // Visual feedback
+                const btn = document.getElementById(`btn-${side}`);
+                btn.classList.add('bet-active');
+                setTimeout(() => btn.classList.remove('bet-active'), 300);
+                
+                await db.ref('live_bets').push({ player: activeUser, choice: side, amount: currentBetAmount, timestamp: Date.now() });
+                document.getElementById('ticker-box').innerHTML = `✅ You bet ${currentBetAmount} on ${side}!`;
+                
+                // Update button text to show total bet on that side
+                if(side === 'HEADS') document.getElementById('btn-HEADS').innerHTML = `<div class="text-2xl mb-1">🪙</div><div>HEADS</div><div class="text-[9px] text-yellow-300 mt-1">bet: ${userBets.HEADS}</div>`;
+                if(side === 'TAILS') document.getElementById('btn-TAILS').innerHTML = `<div class="text-2xl mb-1">🪙</div><div>TAILS</div><div class="text-[9px] text-yellow-300 mt-1">bet: ${userBets.TAILS}</div>`;
+                if(side === 'DRAW') document.getElementById('btn-DRAW').innerHTML = `<div class="text-2xl mb-1">⚖️</div><div>DRAW</div><div class="text-[9px] text-yellow-300 mt-1">bet: ${userBets.DRAW}</div>`;
+            } finally {
+                setTimeout(() => { isPlacingBet = false; }, 500);
+            }
+        }
+        
+        function resetBetButtonsUI() { 
+            document.getElementById('btn-HEADS').innerHTML = `<div class="text-2xl mb-1">🪙</div><div>HEADS</div><div class="text-[10px] text-cyan-400 mt-1">2x</div>`; 
+            document.getElementById('btn-TAILS').innerHTML = `<div class="text-2xl mb-1">🪙</div><div>TAILS</div><div class="text-[10px] text-indigo-400 mt-1">2x</div>`; 
+            document.getElementById('btn-DRAW').innerHTML = `<div class="text-2xl mb-1">⚖️</div><div>DRAW</div><div class="text-[10px] text-rose-400 mt-1">3x</div>`; 
+        }
+        
+        function updateHistoryUI() { 
+            let container = document.getElementById('coinflip-history-row'); 
+            if(!container) return; 
+            container.innerHTML = ""; 
+            recentResults.slice(0, 12).forEach(res => { 
+                let badge = document.createElement('span'); 
+                badge.innerText = res === 'DRAW' ? '3x' : '2x'; 
+                if(res === 'DRAW') badge.className = "px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white"; 
+                else if(res === 'HEADS') badge.className = "px-2 py-0.5 rounded-full text-[10px] font-black bg-cyan-600 text-white"; 
+                else badge.className = "px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-600 text-white"; 
+                container.appendChild(badge); 
+            }); 
+        }
+        
+        function submitDeposit() { let amt = parseInt(document.getElementById('dep-amount').value); let tid = document.getElementById('dep-tid').value.trim(); if(!amt || amt < 300) return alert("Minimum 300 PKR"); if(!tid) return alert("Enter TID"); db.ref('deposits').push({user: activeUser, amount: amt, tid: tid, status: 'Pending', timestamp: Date.now()}).then(()=>{ alert("✅ Deposit submitted!\n⏰ 24h processing"); switchView('game'); }); }
+        async function submitWithdraw() { if(!hasDeposited) return alert("❌ First deposit required!"); let amt = parseInt(document.getElementById('wit-amount').value); if(amt < 300) return alert("Minimum 300 coins"); if(amt > balance) return alert("Insufficient"); let tax = Math.floor(amt * 0.1); let net = amt - tax; await db.ref(`users/${activeUser}/balance`).set(balance - amt); db.ref('withdraws').push({user: activeUser, amount: amt, net: net, status: 'Pending', timestamp: Date.now()}).then(()=>{ alert(`✅ Withdrawal requested!\n💰 ${amt} coins\n💸 Tax: ${tax}\n💵 You get: ${net}\n⏰ 24h processing`); switchView('game'); }); }
         async function openUserHistory() { switchView('user-history'); let tbody=document.getElementById('user-history-table-body'); tbody.innerHTML=""; let snap=await db.ref('ledger_archive').once('value'); if(snap.exists()) snap.forEach(ch=>{ if(ch.val().user===activeUser) { let tr=document.createElement('tr'); tr.innerHTML=`<td class="py-1">${ch.val().type}</td><td class="text-yellow-400">🪙 ${ch.val().amount}</td><td class="truncate">${ch.val().ref||'-'}</td><td class="${ch.val().status==='Approved'?'text-emerald-400':'text-yellow-500'}">${ch.val().status}</td>`; tbody.appendChild(tr); } }); }
-        function showUserHistory(userId, username) { document.getElementById('modal-user-name').innerHTML = `📜 History: ${username || userId.slice(-8)}`; let tbody = document.getElementById('modal-history-body'); tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Loading...</td></tr>'; document.getElementById('user-history-modal').classList.remove('hidden'); db.ref('ledger_archive').once('value').then(snap => { tbody.innerHTML = ''; let hasData = false; snap.forEach(ch => { let val = ch.val(); if(val.user === userId) { hasData = true; let tr = document.createElement('tr'); let statusClass = val.status === 'Approved' ? 'text-emerald-400' : (val.status === 'Rejected' ? 'text-rose-400' : 'text-yellow-400'); tr.innerHTML = `<td class="py-2">${val.type || '-'}</td><td class="text-yellow-400">🪙 ${val.amount || 0}</td><td class="truncate">${val.ref || '-'}</td><td class="${statusClass}">${val.status || 'Pending'}</td><td class="text-[10px] text-slate-400">${val.timestamp ? new Date(val.timestamp).toLocaleString() : '-'}</td>`; tbody.appendChild(tr); } }); if(!hasData) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">No transactions</td></tr>'; }); }
+        function showUserHistory(userId, username) { document.getElementById('modal-user-name').innerHTML = `📜 History: ${username || userId.slice(-8)}`; let tbody = document.getElementById('modal-history-body'); tbody.innerHTML = '<table><td colspan="5" class="text-center py-4">Loading...</td></tr>'; document.getElementById('user-history-modal').classList.remove('hidden'); db.ref('ledger_archive').once('value').then(snap => { tbody.innerHTML = ''; let hasData = false; snap.forEach(ch => { let val = ch.val(); if(val.user === userId) { hasData = true; let tr = document.createElement('tr'); tr.innerHTML = `<td class="py-2">${val.type || '-'}</td><td class="text-yellow-400">🪙 ${val.amount || 0}</td><td class="truncate">${val.ref || '-'}</td><td class="${val.status === 'Approved' ? 'text-emerald-400' : 'text-yellow-500'}">${val.status || 'Pending'}</td><td class="text-[10px] text-slate-400">${val.timestamp ? new Date(val.timestamp).toLocaleString() : '-'}</td>`; tbody.appendChild(tr); } }); if(!hasData) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">No transactions</td></tr>'; }); }
         function closeUserHistoryModal() { document.getElementById('user-history-modal').classList.add('hidden'); }
-        function editUserBalance(userId, currentBalance, username) { let newBalance = prompt(`Edit balance for ${username || userId.slice(-8)}\nCurrent: ${currentBalance}`, currentBalance); if(newBalance !== null && !isNaN(parseInt(newBalance))) { db.ref(`users/${userId}/balance`).set(parseInt(newBalance)).then(() => alert(`✅ Balance updated to ${parseInt(newBalance)}`)); } }
-        function deleteUserAccount(userId, username) { if(confirm(`⚠️ Delete ${username || userId.slice(-8)}?`)) { db.ref(`users/${userId}`).remove().then(() => alert(`✅ Deleted`)); } }
-        function initAdmin() { db.ref('users').on('value', snap => { let tbody = document.getElementById('admin-users-table'); tbody.innerHTML = ''; let count = 0; snap.forEach(ch => { let user = ch.val(); let uid = ch.key; count++; let row = tbody.insertRow(); row.className = 'user-row border-b border-slate-800'; row.innerHTML = `<td class="py-3 px-2 text-slate-500">${count}</td><td class="py-3 px-2"><span class="font-mono text-xs text-cyan-400">${uid.slice(-12)}</span></td><td class="py-3 px-2">${user.username || 'N/A'}</td><td class="py-3 px-2"><span class="text-yellow-400 font-bold">🪙 ${user.balance || 0}</span></td><td class="py-3 px-2 text-center"><div class="flex gap-1 justify-center"><button onclick="editUserBalance('${uid}', ${user.balance || 0}, '${user.username}')" class="bg-cyan-600 px-2 py-1 rounded text-[10px] font-bold">✏️ Edit</button><button onclick="showUserHistory('${uid}', '${user.username}')" class="bg-indigo-600 px-2 py-1 rounded text-[10px] font-bold">📜 History</button><button onclick="deleteUserAccount('${uid}', '${user.username}')" class="bg-rose-600 px-2 py-1 rounded text-[10px] font-bold">🗑️ Del</button></div></td>`; }); document.getElementById('user-count').innerHTML = `${count} users`; }); db.ref('deposits').on('value', snap => { let div = document.getElementById('admin-deposit-requests'); div.innerHTML = ''; snap.forEach(ch => { let v = ch.val(); div.innerHTML += `<div class="bg-slate-800/50 p-2 rounded-lg text-xs"><div class="text-cyan-400">${v.user?.slice(-8)}</div><div>💰 ${v.amount} | ${v.tid?.slice(-8)}</div><button onclick="approveDep('${ch.key}','${v.user}',${v.amount})" class="bg-emerald-600 px-2 py-0.5 rounded mt-1 text-[10px]">✅ Approve</button> <button onclick="rejectDep('${ch.key}','${v.user}',${v.amount})" class="bg-rose-600 px-2 py-0.5 rounded mt-1 text-[10px]">❌ Reject</button></div>`; }); if(!snap.exists()) div.innerHTML = '<p class="text-slate-500 text-center">No pending deposits</p>'; }); db.ref('withdraws').on('value', snap => { let div = document.getElementById('admin-withdraw-requests'); div.innerHTML = ''; snap.forEach(ch => { let v = ch.val(); div.innerHTML += `<div class="bg-slate-800/50 p-2 rounded-lg text-xs"><div class="text-cyan-400">${v.user?.slice(-8)}</div><div>💸 ${v.amount} | ${v.method}</div><button onclick="approveWith('${ch.key}','${v.user}',${v.amount})" class="bg-amber-600 px-2 py-0.5 rounded mt-1 text-[10px]">✅ Pay</button> <button onclick="rejectWith('${ch.key}','${v.user}',${v.requestedAmount || v.amount})" class="bg-rose-600 px-2 py-0.5 rounded mt-1 text-[10px]">❌ Reject</button></div>`; }); if(!snap.exists()) div.innerHTML = '<p class="text-slate-500 text-center">No pending withdrawals</p>'; }); }
-        window.approveDep = (key, uid, amt) => { db.ref(`users/${uid}/balance`).transaction(c => (c || 0) + amt); db.ref(`users/${uid}/hasDeposited`).set(true); db.ref(`ledger_archive`).push({user:uid, type:"DEPOSIT", amount:amt, status:"Approved", ref:"TID", timestamp:Date.now()}); db.ref(`deposits/${key}`).remove(); alert("✅ Deposit Approved!"); };
-        window.rejectDep = (key, uid, amt) => { db.ref(`ledger_archive`).push({user:uid, type:"DEPOSIT", amount:amt, status:"Rejected", ref:"TID", timestamp:Date.now()}); db.ref(`deposits/${key}`).remove(); alert("❌ Deposit Rejected!"); };
-        window.approveWith = (key, uid, amt) => { db.ref(`ledger_archive`).push({user:uid, type:"WITHDRAW", amount:amt, status:"Approved", ref:"Paid", timestamp:Date.now()}); db.ref(`withdraws/${key}`).remove(); alert("✅ Withdrawal Approved!"); };
-        window.rejectWith = (key, uid, amt) => { db.ref(`users/${uid}/balance`).transaction(c => (c || 0) + amt); db.ref(`ledger_archive`).push({user:uid, type:"WITHDRAW", amount:amt, status:"Rejected", ref:"Refunded", timestamp:Date.now()}); db.ref(`withdraws/${key}`).remove(); alert("❌ Withdrawal Rejected! Refunded."); };
+        function editUserBalance(userId, currentBalance, username) { let newBalance = prompt(`Edit balance for ${username || userId.slice(-8)}\nCurrent: ${currentBalance}`, currentBalance); if(newBalance !== null && !isNaN(parseInt(newBalance))) { db.ref(`users/${userId}/balance`).set(parseInt(newBalance)).then(() => alert(`✅ Updated to ${parseInt(newBalance)}`)); } }
+        function deleteUserAccount(userId, username) { if(confirm(`⚠️ Delete ${username || userId.slice(-8)}?`)) { db.ref(`users/${userId}`).remove(); alert("✅ Deleted"); } }
+        function initAdmin() { 
+            db.ref('users').on('value', snap => { let tbody = document.getElementById('admin-users-table'); tbody.innerHTML = ''; let count = 0; snap.forEach(ch => { let user = ch.val(); let uid = ch.key; count++; let row = tbody.insertRow(); row.innerHTML = `<td class="py-2 px-2">${count}</td><td class="py-2 px-2 font-mono text-xs text-cyan-400">${uid.slice(-12)}</td><td class="py-2 px-2">${user.username || 'N/A'}</td><td class="py-2 px-2 text-yellow-400">🪙 ${user.balance || 0}</td><td class="py-2 px-2">${user.hasDeposited ? '✅' : '❌'}</td><td class="py-2 px-2"><button onclick="editUserBalance('${uid}', ${user.balance || 0}, '${user.username}')" class="bg-cyan-600 px-2 py-0.5 rounded text-[10px]">Edit</button> <button onclick="showUserHistory('${uid}', '${user.username}')" class="bg-indigo-600 px-2 py-0.5 rounded text-[10px]">Hist</button> <button onclick="deleteUserAccount('${uid}', '${user.username}')" class="bg-rose-600 px-2 py-0.5 rounded text-[10px]">Del</button></td>`; }); });
+            db.ref('deposits').on('value', snap => { let div = document.getElementById('admin-deposit-requests'); div.innerHTML = ''; snap.forEach(ch => { let v = ch.val(); if(v.status === 'Pending') { div.innerHTML += `<div class="bg-slate-800/50 p-2 rounded-lg text-xs mb-2"><div class="text-cyan-400">${v.user?.slice(-8)}</div><div>💰 ${v.amount} PKR</div><button onclick="approveDep('${ch.key}','${v.user}',${v.amount})" class="bg-emerald-600 px-2 py-0.5 rounded text-[10px]">Approve</button></div>`; } }); });
+            db.ref('withdraws').on('value', snap => { let div = document.getElementById('admin-withdraw-requests'); div.innerHTML = ''; snap.forEach(ch => { let v = ch.val(); if(v.status === 'Pending') { div.innerHTML += `<div class="bg-slate-800/50 p-2 rounded-lg text-xs mb-2"><div class="text-cyan-400">${v.user?.slice(-8)}</div><div>💸 ${v.amount} coins</div><button onclick="approveWith('${ch.key}','${v.user}',${v.amount})" class="bg-amber-600 px-2 py-0.5 rounded text-[10px]">Pay</button></div>`; } }); });
+        }
+        window.approveDep = (key, uid, amt) => { db.ref(`users/${uid}/balance`).transaction(c => (c || 0) + amt); db.ref(`users/${uid}/hasDeposited`).set(true); db.ref(`ledger_archive`).push({user:uid, type:"DEPOSIT", amount:amt, status:"Approved", timestamp:Date.now()}); db.ref(`deposits/${key}`).remove(); alert("✅ Approved!"); };
+        window.approveWith = (key, uid, amt) => { db.ref(`ledger_archive`).push({user:uid, type:"WITHDRAW", amount:amt, status:"Approved", timestamp:Date.now()}); db.ref(`withdraws/${key}`).remove(); alert("✅ Paid!"); };
     </script>
 </body>
 </html>
